@@ -520,6 +520,12 @@ static __strong NSData *CRLFCRLF;
 - (void)didConnect
 {
     SRFastLog(@"Connected");
+    
+    CFDataRef nativeSocket = CFWriteStreamCopyProperty((__bridge CFWriteStreamRef)(_outputStream), kCFStreamPropertySocketNativeHandle);
+    CFSocketNativeHandle *sock = (CFSocketNativeHandle *)CFDataGetBytePtr(nativeSocket);
+    setsockopt(*sock, IPPROTO_TCP, TCP_NODELAY, &(int){ 1 }, sizeof(int));
+    CFRelease(nativeSocket);
+    
     CFHTTPMessageRef request = CFHTTPMessageCreateRequest(NULL, CFSTR("GET"), (__bridge CFURLRef)_url, kCFHTTPVersion1_1);
     
     // Set host first so it defaults
@@ -576,11 +582,6 @@ static __strong NSData *CRLFCRLF;
     // Set up the connections to be VOIP
     [_inputStream setProperty:NSStreamNetworkServiceTypeVoIP forKey:NSStreamNetworkServiceType];
     [_outputStream setProperty:NSStreamNetworkServiceTypeVoIP forKey:NSStreamNetworkServiceType];
-    
-    CFDataRef nativeSocket = CFWriteStreamCopyProperty(writeStream, kCFStreamPropertySocketNativeHandle);
-    CFSocketNativeHandle *sock = (CFSocketNativeHandle *)CFDataGetBytePtr(nativeSocket);
-    setsockopt(*sock, IPPROTO_TCP, TCP_NODELAY, &(int){ 1 }, sizeof(int));
-    CFRelease(nativeSocket);
     
     if (_secure) {
         NSMutableDictionary *SSLOptions = [[NSMutableDictionary alloc] init];
