@@ -17,6 +17,9 @@
 
 #import "SRWebSocket.h"
 
+#include <netinet/tcp.h>
+#include <netinet/in.h>
+
 #if TARGET_OS_IPHONE
 #define HAS_ICU
 #endif
@@ -573,6 +576,11 @@ static __strong NSData *CRLFCRLF;
     // Set up the connections to be VOIP
     [_inputStream setProperty:NSStreamNetworkServiceTypeVoIP forKey:NSStreamNetworkServiceType];
     [_outputStream setProperty:NSStreamNetworkServiceTypeVoIP forKey:NSStreamNetworkServiceType];
+    
+    CFDataRef nativeSocket = CFWriteStreamCopyProperty(writeStream, kCFStreamPropertySocketNativeHandle);
+    CFSocketNativeHandle *sock = (CFSocketNativeHandle *)CFDataGetBytePtr(nativeSocket);
+    setsockopt(*sock, IPPROTO_TCP, TCP_NODELAY, &(int){ 1 }, sizeof(int));
+    CFRelease(nativeSocket);
     
     if (_secure) {
         NSMutableDictionary *SSLOptions = [[NSMutableDictionary alloc] init];
