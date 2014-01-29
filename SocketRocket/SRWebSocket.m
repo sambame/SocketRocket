@@ -725,6 +725,7 @@ static __strong NSData *CRLFCRLF;
     [_outputBuffer appendData:data];
     [self _pumpWriting];
 }
+
 - (void)send:(id)data;
 {
     NSAssert(self.readyState != SR_CONNECTING, @"Invalid State: Cannot call send: until connection is open");
@@ -743,6 +744,12 @@ static __strong NSData *CRLFCRLF;
     });
 }
 
+- (void)sendPing {
+    dispatch_async(_workQueue, ^{
+        [self _sendFrameWithOpcode:SROpCodePing data:[NSData data]];
+    });
+}
+
 - (void)handlePing:(NSData *)pingData;
 {
     // Need to pingpong this off _callbackQueue first to make sure messages happen in order
@@ -755,7 +762,12 @@ static __strong NSData *CRLFCRLF;
 
 - (void)handlePong;
 {
-    // NOOP
+    SRFastLog(@"Received pong");
+    [self _performDelegateBlock:^{
+        if ([self.delegate respondsToSelector:@selector(webSocketDidPong:)]) {
+            [self.delegate webSocketDidPong:self];
+        }
+    }];
 }
 
 - (void)_handleMessage:(id)message

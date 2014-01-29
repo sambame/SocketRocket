@@ -70,7 +70,7 @@ extern NSString *const SRWebSocketErrorDomain;
 
 // Send a UTF8 String or Data.
 - (void)send:(id)data;
-
+- (void)sendPing;
 @end
 
 #pragma mark - SRWebSocketDelegate
@@ -84,6 +84,7 @@ extern NSString *const SRWebSocketErrorDomain;
 @optional
 
 - (void)webSocketDidOpen:(SRWebSocket *)webSocket;
+- (void)webSocketDidPong:(SRWebSocket *)webSocket;
 - (void)webSocket:(SRWebSocket *)webSocket didFailWithError:(NSError *)error;
 - (void)webSocket:(SRWebSocket *)webSocket didCloseWithCode:(NSInteger)code reason:(NSString *)reason wasClean:(BOOL)wasClean;
 
