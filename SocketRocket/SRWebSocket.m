@@ -522,8 +522,10 @@ static __strong NSData *CRLFCRLF;
     SRFastLog(@"Connected");
     
     CFDataRef nativeSocket = CFWriteStreamCopyProperty((__bridge CFWriteStreamRef)(_outputStream), kCFStreamPropertySocketNativeHandle);
-    CFSocketNativeHandle *sock = (CFSocketNativeHandle *)CFDataGetBytePtr(nativeSocket);
-    setsockopt(*sock, IPPROTO_TCP, TCP_NODELAY, &(int){ 1 }, sizeof(int));
+
+    CFSocketNativeHandle handle;
+    CFDataGetBytes(nativeSocket, CFRangeMake(0, sizeof(handle)), (UInt8*) &handle);    
+    setsockopt(handle, IPPROTO_TCP, TCP_NODELAY, &(int){ 1 }, sizeof(int));
     CFRelease(nativeSocket);
     
     CFHTTPMessageRef request = CFHTTPMessageCreateRequest(NULL, CFSTR("GET"), (__bridge CFURLRef)_url, kCFHTTPVersion1_1);
