@@ -517,6 +517,8 @@ static __strong NSData *CRLFCRLF;
     }];
 }
 
+static const int kOne = 1;
+
 - (void)didConnect
 {
     SRFastLog(@"Connected");
@@ -525,7 +527,9 @@ static __strong NSData *CRLFCRLF;
 
     CFSocketNativeHandle handle;
     CFDataGetBytes(nativeSocket, CFRangeMake(0, sizeof(handle)), (UInt8*) &handle);    
-    setsockopt(handle, IPPROTO_TCP, TCP_NODELAY, &(int){ 1 }, sizeof(int));
+    
+    setsockopt(handle, IPPROTO_TCP, TCP_NODELAY, &kOne, sizeof(kOne));
+    
     CFRelease(nativeSocket);
     
     CFHTTPMessageRef request = CFHTTPMessageCreateRequest(NULL, CFSTR("GET"), (__bridge CFURLRef)_url, kCFHTTPVersion1_1);
@@ -563,7 +567,7 @@ static __strong NSData *CRLFCRLF;
 
 - (void)_initializeStreams;
 {
-    NSInteger port = _url.port.integerValue;
+    UInt32 port = _url.port.unsignedIntValue;
     if (port == 0) {
         if (!_secure) {
             port = 80;
@@ -577,7 +581,7 @@ static __strong NSData *CRLFCRLF;
     CFWriteStreamRef writeStream = NULL;
     
     CFStreamCreatePairWithSocketToHost(NULL, (__bridge CFStringRef)host, port, &readStream, &writeStream);
-    
+
     _outputStream = CFBridgingRelease(writeStream);
     _inputStream = CFBridgingRelease(readStream);
     
@@ -1108,8 +1112,8 @@ static const uint8_t SRPayloadLenMask   = 0x7F;
             _outputBufferOffset = 0;
         }
     }
-    
-    if (_closeWhenFinishedWriting && 
+
+    if (_closeWhenFinishedWriting &&
         _outputBuffer.length - _outputBufferOffset == 0 && 
         (_inputStream.streamStatus != NSStreamStatusNotOpen &&
          _inputStream.streamStatus != NSStreamStatusClosed) &&
