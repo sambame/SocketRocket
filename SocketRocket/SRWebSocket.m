@@ -461,7 +461,14 @@ static __strong NSData *CRLFCRLF;
 - (void)_HTTPHeadersDidFinish;
 {
     NSInteger responseCode = CFHTTPMessageGetResponseStatusCode(_receivedHTTPHeaders);
-    
+
+    if (responseCode == 401) {
+        SRFastLog(@"Request failed with response code %d", responseCode);
+        [self _failWithError:[NSError errorWithDomain:@"org.lolrus.SocketRocket" code:2131 userInfo:[NSDictionary dictionaryWithObject:@"Unauthorized" forKey:NSLocalizedDescriptionKey]]];
+        return;
+        
+    }
+
     if (responseCode >= 400) {
         SRFastLog(@"Request failed with response code %d", responseCode);
         [self _failWithError:[NSError errorWithDomain:@"org.lolrus.SocketRocket" code:2132 userInfo:[NSDictionary dictionaryWithObject:[NSString stringWithFormat:@"received bad response code from server %ld", (long)responseCode] forKey:NSLocalizedDescriptionKey]]];
