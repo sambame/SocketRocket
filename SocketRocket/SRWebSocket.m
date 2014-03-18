@@ -532,6 +532,10 @@ static const int kOne = 1;
     
     CFDataRef nativeSocket = CFWriteStreamCopyProperty((__bridge CFWriteStreamRef)(_outputStream), kCFStreamPropertySocketNativeHandle);
 
+    if (nativeSocket == nil) {
+        return;
+    }
+    
     CFSocketNativeHandle handle;
     CFDataGetBytes(nativeSocket, CFRangeMake(0, sizeof(handle)), (UInt8*) &handle);    
     
