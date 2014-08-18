@@ -71,6 +71,8 @@ extern NSString *const SRWebSocketErrorDomain;
 // Send a UTF8 String or Data.
 - (void)send:(id)data;
 - (void)sendPing;
+
+- (void)supportsBackground;
 @end
 
 #pragma mark - SRWebSocketDelegate

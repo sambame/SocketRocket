@@ -576,6 +576,12 @@ static const int kOne = 1;
     [self _readHTTPHeader];
 }
 
+- (void)supportsBackground {
+    // Set up the connections to be VOIP
+    [_inputStream setProperty:NSStreamNetworkServiceTypeVoIP forKey:NSStreamNetworkServiceType];
+    [_outputStream setProperty:NSStreamNetworkServiceTypeVoIP forKey:NSStreamNetworkServiceType];
+}
+
 - (void)_initializeStreams;
 {
     UInt32 port = _url.port.unsignedIntValue;
@@ -595,10 +601,6 @@ static const int kOne = 1;
 
     _outputStream = CFBridgingRelease(writeStream);
     _inputStream = CFBridgingRelease(readStream);
-    
-    // Set up the connections to be VOIP
-    [_inputStream setProperty:NSStreamNetworkServiceTypeVoIP forKey:NSStreamNetworkServiceType];
-    [_outputStream setProperty:NSStreamNetworkServiceTypeVoIP forKey:NSStreamNetworkServiceType];
     
     if (_secure) {
         NSMutableDictionary *SSLOptions = [[NSMutableDictionary alloc] init];
