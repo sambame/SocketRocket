@@ -765,6 +765,10 @@ static const int kOne = 1;
 
 - (void)sendPing {
     dispatch_async(_workQueue, ^{
+        if (self.readyState != SR_OPEN) {
+            return;
+        }
+        
         [self _sendFrameWithOpcode:SROpCodePing data:[NSData data]];
     });
 }
